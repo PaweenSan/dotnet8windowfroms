@@ -4,56 +4,20 @@
 
 ---
 
-## 1. สคริปต์คลิปวิดีโออธิบายการทำงาน (5-10 นาที)
+## ความสามารถหลัก (Features)
 
-### เปิดตัว (1 นาที)
-```
-สวัสดีครับ/คะ วันนี้จะมานำเสนอโปรแกรมระบบจัดการคลินิก
-พัฒนาด้วยภาษา C# บน .NET 8 ใช้ Windows Forms เป็น UI
-เชื่อมต่อฐานข้อมูล 3 ฐานข้อมูล ได้แก่
-- ฐานข้อมูลผู้ป่วย (patients.db)
-- ฐานข้อมูลแพทย์ (doctors.db)
-- ฐานข้อมูลการนัดหมาย (appointments.db)
-```
-
-### สาธิตการทำงาน (5-6 นาที)
-**หน้าหลัก:**
-- แสดงเมนู 3 รายการ: จัดการผู้ป่วย, จัดการแพทย์, จัดการนัดหมาย
-- แสดงปุ่มสถานะสี (เขียว = เชื่อมต่อสำเร็จ)
-
-**จัดการผู้ป่วย:**
-- เพิ่มผู้ป่วยใหม่ (ชื่อ, อายุ, โทรศัพท์, ที่อยู่)
-- แสดงรายการใน DataGridView
-- คลิกแถวเพื่อแก้ไขข้อมูล
-- ลบข้อมูล (มี MessageBox ยืนยันทุกครั้ง)
-- ค้นหาผู้ป่วยตามชื่อหรือเบอร์โทร
-
-**จัดการแพทย์:**
-- เพิ่มแพทย์ (ชื่อ, ความเชี่ยวชาญ, โทรศัพท์, แผนก)
-- แก้ไข/ลบ ข้อมูลแพทย์
-- กรองตามความเชี่ยวชาญ (เช่น อายุรกรรม, ศัลยกรรม)
-
-**จัดการนัดหมาย:**
-- เลือกผู้ป่วยจาก ComboBox (ดึงจาก patients.db)
-- เลือกแพทย์จาก ComboBox (ดึงจาก doctors.db)
-- กำหนดวัน-เวลานัดหมาย
-- เลือกสถานะ (รอดำเนินการ, ยืนยันแล้ว, ยกเลิก)
-- กรองตามวันที่หรือสถานะ
-- แสดงชื่อผู้ป่วยและแพทย์ใน DataGridView (JOIN ข้าม database)
-
-### อธิบายผลลัพธ์ (1 นาที)
-```
-โปรแกรมสามารถจัดการข้อมูลคลินิกได้ครบวงจร
-เชื่อม 3 ฐานข้อมูลแยกกัน แต่แสดงผลรวมได้ผ่าน JOIN query
-มีการตรวจสอบและยืนยันทุกครั้งก่อน CRUD
-รองรับการค้นหาและกรองข้อมูล
-```
+- **จัดการผู้ป่วย:** เพิ่ม, แสดง, ค้นหา, แก้ไข, ลบ ข้อมูลผู้ป่วย
+- **จัดการแพทย์:** เพิ่ม, แสดง, กรอง, แก้ไข, ลบ ข้อมูลแพทย์
+- **จัดการนัดหมาย:** นัดหมายผู้ป่วยกับแพทย์ อัปเดตสถานะ กรองตามวันที่/สถานะ
+- **เชื่อมต่อ 3 ฐานข้อมูล:** patients.db, doctors.db, appointments.db
+- **MessageBox ยืนยัน:** ทุกการ Add/Update/Delete มี Yes/No
+- **รองรับหลายฐานข้อมูล:** SQLite (default), SQL Server, MySQL
+- **MCP Server (Bonus):** ให้ AI agent เรียกใช้ CRUD ได้ผ่าน stdio transport
 
 ---
 
-## 2. อธิบาย Code
+## โครงสร้างโปรแกรม
 
-### โครงสร้างโปรแกรม
 ```
 ClinicManagement/
 ├── ClinicWinForms/           -- WinForms App (หลัก)
@@ -62,176 +26,81 @@ ClinicManagement/
 │   ├── frmDoctors.cs          -- CRUD แพทย์
 │   ├── frmAppointments.cs    -- CRUD นัดหมาย
 │   └── Data/
-│       ├── DatabaseConfig.cs       -- ตั้งค่า DB (sqlite/sqlserver/mysql)
-│       ├── DbConnectionFactory.cs  -- สร้าง connection ตาม DB type
+│       ├── DatabaseConfig.cs       -- ตั้งค่า DB type
+│       ├── DbConnectionFactory.cs  -- สร้าง connection
 │       ├── DatabaseInitializer.cs  -- สร้างตาราง + seed data
 │       ├── PatientRepository.cs    -- SQL ผู้ป่วย
 │       ├── DoctorRepository.cs     -- SQL แพทย์
 │       └── AppointmentRepository.cs -- SQL นัดหมาย + ATTACH DB
-├── ClinicMcpServer/            -- MCP Server (Bonus)
-│   └── Services/
-│       ├── PatientService.cs  -- MCP tools ผู้ป่วย
-│       ├── DoctorService.cs   -- MCP tools แพทย์
-│       └── AppointmentService.cs -- MCP tools นัดหมาย
-└── Scripts/
-    ├── sqlite/setup-databases.sql
-    ├── sqlserver/setup-databases.sql
-    └── mysql/setup-databases.sql
-```
-
-### ส่วนเชื่อมต่อฐานข้อมูล (DatabaseConfig.cs)
-```csharp
-public static class DatabaseConfig
-{
-    public const string DB_TYPE = "sqlite";  // เปลี่ยนเป็น sqlserver หรือ mysql ได้
-
-    public static string GetConnectionString(string dbName)
-    {
-        return DB_TYPE switch
-        {
-            "sqlite" => $"Data Source=...{dbName}.db",
-            "sqlserver" => $"Data Source=localhost\\SQLEXPRESS; Database={dbName};...",
-            "mysql" => $"Server=localhost;Database={dbName};...",
-        };
-    }
-}
-```
-- ใช้ pattern Strategy สลับระหว่าง SQLite / SQL Server / MySQL
-- แก้แค่ DB_TYPE ตัวเดียวทั้งโปรแกรมเปลี่ยน
-
-### สร้าง Connection (DbConnectionFactory.cs)
-```csharp
-public static IDbConnection CreateConnection(string connectionString)
-{
-    return DatabaseConfig.DB_TYPE switch
-    {
-        "sqlite" => new SqliteConnection(connectionString),
-        ...
-    };
-}
-```
-- คืนค่าเป็น `IDbConnection` interface ไม่ใช่ class จริง
-- ทำให้สลับ database ได้ไม่ต้องแก้โค้ดทุกจุด
-
-### จัดการข้อมูล (Repository Pattern)
-```csharp
-public DataTable ListPatients()
-{
-    DataTable dt = new DataTable();
-    using var conn = DbConnectionFactory.CreateConnection(_connString);
-    conn.Open();
-    using var cmd = conn.CreateCommand();
-    cmd.CommandText = "SELECT * FROM Patients ORDER BY PatientID DESC";
-    using var reader = cmd.ExecuteReader();
-    dt.Load(reader);
-    return dt;
-}
-```
-- ใช้ `using` statement ทุกครั้ง ป้องกัน memory leak
-- ใช้ `IDbCommand`, `IDataReader` (interface) เชื่อมได้ทุก DB
-
-### เชื่อม 3 ฐานข้อมูล (AppointmentRepository.cs)
-SQLite ไม่สนับสนุน JOIN ข้ามไฟล์โดยตรง ใช้ `ATTACH DATABASE`:
-```csharp
-private void AttachDatabases(IDbConnection conn)
-{
-    using var cmd = conn.CreateCommand();
-    cmd.CommandText = "ATTACH DATABASE 'patients.db' AS patients;";
-    cmd.ExecuteNonQuery();
-    cmd.CommandText = "ATTACH DATABASE 'doctors.db' AS doctors;";
-    cmd.ExecuteNonQuery();
-}
-```
-จากนั้น JOIN ผ่าน alias:
-```sql
-SELECT a.*, p.Name AS PatientName, d.Name AS DoctorName
-FROM Appointments a
-LEFT JOIN patients.Patients p ON a.PatientID = p.PatientID
-LEFT JOIN doctors.Doctors d ON a.DoctorID = d.DoctorID
-```
-
-### ฟังก์ชันสำคัญ
-- **CRUD ครบทุกฟอร์ม:** เพิ่ม, แสดง, ค้นหา, แก้ไข, ลบ
-- **Transaction:** ทุก INSERT/UPDATE/DELETE ใช้ `BeginTransaction()` + `Commit/Rollback`
-- **Validation:** ตรวจสอบช่องว่าง, ตัวเลข, ซ้ำกัน
-- **MessageBox ยืนยัน:** ทุกปุ่ม Add/Update/Delete มี Yes/No
-- **Multi-database:** รองรับ SQLite (default), SQL Server, MySQL
-
-### MCP Server (Bonus)
-```csharp
-[McpServerToolType]
-public class PatientService
-{
-    [McpServerTool]
-    public string GetAllPatients() { ... }
-
-    [McpServerTool]
-    public string AddPatient(string name, int age, ...) { ... }
-}
-```
-- ใช้ NuGet `ModelContextProtocol`
-- Expose methods เป็น tools ให้ AI agent เรียกใช้
-- รันแบบ stdio transport เชื่อมกับ Claude Desktop / Windsurf
-
----
-
-## 3. ไฟล์ที่ต้องส่ง
-
-### สร้าง ZIP จากโฟลเดอร์นี้:
-```
-ClinicManagement/
-├── ClinicManagement.sln
-├── ClinicWinForms/
-│   ├── ClinicWinForms.csproj
-│   ├── Program.cs
-│   ├── frmMain.cs, frmMain.Designer.cs
-│   ├── frmPatients.cs, frmPatients.Designer.cs
-│   ├── frmDoctors.cs, frmDoctors.Designer.cs
-│   ├── frmAppointments.cs, frmAppointments.Designer.cs
-│   └── Data/
-│       ├── DatabaseConfig.cs
-│       ├── DbConnectionFactory.cs
-│       ├── DatabaseInitializer.cs
-│       ├── PatientRepository.cs
-│       ├── DoctorRepository.cs
-│       └── AppointmentRepository.cs
-├── ClinicMcpServer/ (Bonus)
-│   ├── ClinicMcpServer.csproj
+├── ClinicMcpServer/          -- MCP Server (Bonus)
 │   ├── Program.cs
 │   └── Services/
 │       ├── PatientService.cs
 │       ├── DoctorService.cs
 │       └── AppointmentService.cs
 └── Scripts/
-    ├── sqlite/setup-databases.sql, reset-databases.sql
-    ├── sqlserver/setup-databases.sql, reset-databases.sql
-    └── mysql/setup-databases.sql, reset-databases.sql
-```
-
-### คำสั่งสร้าง ZIP:
-```powershell
-Compress-Archive -Path "C:\Users\xray\ClinicManagement\ClinicManagement.sln", `
-    "C:\Users\xray\ClinicManagement\ClinicWinForms", `
-    "C:\Users\xray\ClinicManagement\ClinicMcpServer", `
-    "C:\Users\xray\ClinicManagement\Scripts" `
-    -DestinationPath "C:\Users\xray\ClinicManagement.zip"
+    ├── sqlite/
+    ├── sqlserver/
+    └── mysql/
 ```
 
 ---
 
-## หมายเหตุสำหรับการสอน/อธิบาย
+## เทคนิคการเชื่อมต่อฐานข้อมูล
 
-**จุดเด่นที่ควรเน้นในคลิป:**
-1. โชว์ปุ่มสถานะสีเขียว (เชื่อมต่อ 3 DB สำเร็จ)
-2. เปิดโฟลเดอร์ Databases โชว์ 3 ไฟล์ .db
-3. อธิบายว่าแต่ละฟอร์มเชื่อม DB คนละตัว
-4. โชว์ Appointment ที่ JOIN ชื่อผู้ป่วย+แพทย์ จากอีก 2 DB
-5. กล่าวถึง MCP Server ว่าเป็น bonus ให้ AI เรียกใช้ได้
+### สลับฐานข้อมูลได้ด้วยการเปลี่ยน 1 ตัวแปร
+ใน `DatabaseConfig.cs`:
+```csharp
+public const string DB_TYPE = "sqlite";
+// เปลี่ยนเป็น "sqlserver" หรือ "mysql" ได้ทันที
+```
 
-**คำถามที่อาจถูกถาม:**
-- Q: ทำไมใช้ SQLite ไม่ใช้ SQL Server?
-  A: SQLite ไม่ต้องติดตั้ง server รันได้ทันที แต่รองรับ SQL Server/MySQL ด้วยการเปลี่ยน config
-- Q: เชื่อม 3 DB ยังไง?
-  A: ใช้ ATTACH DATABASE ใน SQLite หรือใช้ connection string คนละ database ใน SQL Server
-- Q: MCP คืออะไร?
-  A: Model Context Protocol ของ Anthropic ให้ AI agent เชื่อมโปรแกรมภายนอกได้
+### ใช้ Interface เพื่อสลับ Database ไม่ต้องแก้โค้ดทุกจุด
+```csharp
+public static IDbConnection CreateConnection(string connectionString)
+{
+    return DatabaseConfig.DB_TYPE switch
+    {
+        "sqlite" => new SqliteConnection(connectionString),
+        "sqlserver" => new SqlConnection(connectionString),
+        "mysql" => new MySqlConnection(connectionString),
+    };
+}
+```
+คืนค่าเป็น `IDbConnection` (interface) ทำให้ Repository ทุกตัวใช้ได้กับทุก DB
+
+### เชื่อม 3 ฐานข้อมูลแยกไฟล์ (SQLite)
+ใช้ `ATTACH DATABASE` เพื่อ JOIN ข้ามไฟล์:
+```sql
+ATTACH DATABASE 'patients.db' AS patients;
+ATTACH DATABASE 'doctors.db' AS doctors;
+
+SELECT a.*, p.Name AS PatientName, d.Name AS DoctorName
+FROM Appointments a
+LEFT JOIN patients.Patients p ON a.PatientID = p.PatientID
+LEFT JOIN doctors.Doctors d ON a.DoctorID = d.DoctorID
+```
+
+---
+
+## วิธีรันโปรแกรม
+
+**WinForms:**
+```bash
+dotnet run --project ClinicWinForms/ClinicWinForms.csproj
+```
+หรือเปิด `ClinicManagement.sln` ใน Visual Studio แล้วกด F5
+
+**MCP Server (Bonus):**
+```bash
+dotnet run --project ClinicMcpServer/ClinicMcpServer.csproj
+```
+
+---
+
+## ข้อกำหนดการต่อขยาย
+
+- แก้ `DatabaseConfig.DB_TYPE` เป็น `"sqlserver"` หรือ `"mysql"`
+- รัน SQL script ใน `Scripts/[dbtype]/setup-databases.sql`
+- เพิ่ม NuGet package `System.Data.SqlClient` หรือ `MySql.Data` ใน `.csproj`
+- ไม่ต้องแก้ไข Repository ใดๆ เพราะใช้ `IDb*` interfaces ทั้งหมด

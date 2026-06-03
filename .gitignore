@@ -15,3 +15,6 @@ Databases/
 # NuGet
 *.nuget.props
 *.nuget.targets
+
+# Presentation scripts (not part of source code)
+VIDEO_SCRIPT.md

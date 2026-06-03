@@ -11,7 +11,6 @@
 - **เชื่อมต่อ 3 ฐานข้อมูล:** patients.db, doctors.db, appointments.db
 - **MessageBox ยืนยัน:** ทุกการ Add/Update/Delete มี Yes/No
 - **รองรับหลายฐานข้อมูล:** SQLite (default), SQL Server, MySQL
-- **MCP Server (Bonus):** ให้ AI agent เรียกใช้ CRUD ได้ผ่าน stdio transport
 
 ---
 

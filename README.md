@@ -83,16 +83,35 @@ LEFT JOIN doctors.Doctors d ON a.DoctorID = d.DoctorID
 
 ## วิธีรันโปรแกรม
 
+### วิธีที่ 1: รันผ่าน .NET SDK (ต้องติดตั้ง SDK ก่อน)
+
 **WinForms:**
 ```bash
 dotnet run --project ClinicWinForms/ClinicWinForms.csproj
 ```
-หรือเปิด `ClinicManagement.sln` ใน Visual Studio แล้วกด F5
 
 **MCP Server (Bonus):**
 ```bash
 dotnet run --project ClinicMcpServer/ClinicMcpServer.csproj
 ```
+
+หรือเปิด `ClinicManagement.sln` ใน Visual Studio แล้วกด F5
+
+### วิธีที่ 2: รันไฟล์ .exe ตรงๆ (ไม่ต้องมี SDK)
+
+หากเครื่องมีแค่ **.NET Runtime** แต่ไม่มี **SDK** (`dotnet run` ใช้ไม่ได้) ให้รันไฟล์ที่ Build ไว้แล้วได้เลย:
+
+**WinForms:**
+```bash
+ClinicWinForms/bin/Debug/net8.0-windows/ClinicWinForms.exe
+```
+
+**MCP Server (Bonus):**
+```bash
+ClinicMcpServer/bin/Debug/net8.0/ClinicMcpServer.exe
+```
+
+> **หมายเหตุ:** วิธีที่ 2 ใช้ได้เฉพาะรันโปรแกรมที่ Build ไว้แล้ว หากต้องการแก้ไขโค้ดและ Build ใหม่ จำเป็นต้องติดตั้ง **.NET 8.0 SDK**
 
 ---
 
